@@ -26,7 +26,7 @@ let data = [
         pict: 'https://id-live-01.slatic.net/p/d604b03546d5acbcc76796f93687b62a.png'
     },
     {
-        id: 2,
+        id: 3,
         title: 'Baju Muslim Pria2',
         price: 50000,
         stock: 31,
@@ -34,7 +34,7 @@ let data = [
         pict: 'https://3.bp.blogspot.com/-4YlIbzETC2E/W3_SeWLWEtI/AAAAAAAAEuE/Q5ChzTlsya0DekJPP4xE1NWnr1WD7PBGwCLcBGAs/s1600/baju%2Bmuslim%2Bpria%2Bjudul.jpg'
     },
     {
-        id: 3,
+        id: 4,
         title: 'Baju Muslim Pria3',
         price: 50000,
         stock: 31,
@@ -42,6 +42,8 @@ let data = [
         pict: 'https://3.bp.blogspot.com/-4YlIbzETC2E/W3_SeWLWEtI/AAAAAAAAEuE/Q5ChzTlsya0DekJPP4xE1NWnr1WD7PBGwCLcBGAs/s1600/baju%2Bmuslim%2Bpria%2Bjudul.jpg'
     }
 ]
+
+let cartItems = []
 
 let box = document.getElementById('item-box');
 let html = '';
@@ -66,7 +68,7 @@ for (let i = 0; i < data.length; i++) {
             </div>
             <!-- Product actions-->
             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                <div class="text-center"><a class="btn btn-outline-dark mt-auto" onclick="addItemToCart()">Add to cart</a></div>
+                <div class="text-center"><a class="btn btn-outline-dark mt-auto" onclick="addItemToCart(${data[i].id})">Add to cart</a></div>
             </div>
         </div>
     </div>
@@ -74,9 +76,53 @@ for (let i = 0; i < data.length; i++) {
 }
 box.innerHTML = html;
 
-function addItemToCart() {
+function addItemToCart(id) {
+    let index = data.findIndex(function(obj) {
+        return obj.id === id;
+    })
+    // console.log(index);
+    let cartIndex = cartItems.findIndex( function(obj) { return obj.id === id })
+
+    if (cartIndex !== -1) {
+        cartItems[cartIndex].qty++;
+    } else {
+        cartItems.push({
+            id: data[index].id,
+            title: data[index].title,
+            price: data[index].price,
+            qty: 1,
+            total: function() {
+                return this.price * this.qty;
+            }
+        })
+    }
     let cart = document.getElementById('cart-qty');
-    let qty = Number(cart.textContent)
-    qty++;
-    cart.textContent = qty;
+    // let qty = Number(cart.textContent)
+    // qty++;
+    cart.textContent = cartItems.length;
+}
+
+function readCart() {
+    let tbody = document.getElementById('cart-item');
+    let row = ``;
+    for (let i = 0; i < cartItems.length; i++) {
+        row += `
+        <tr>
+            <th scope="row">${cartItems[i].id}</th>
+            <td>${cartItems[i].title}</td>
+            <td>Rp ${cartItems[i].price}</td>
+            <td><input type="number" disabled value="${cartItems[i].qty}"></td>
+            <td><button class="btn btn-danger" onclick="delCartItem(${cartItems[i].id})">Del</button></td>
+            <td>Rp ${cartItems[i].total()}</td>
+        </tr>
+        `
+    }
+    tbody.innerHTML = row;
+}
+
+function delCartItem(id) {
+    let index = cartItems.findIndex(function(obj) { return obj.id === id });
+
+    cartItems.splice(index, 1);
+    readCart()
 }
